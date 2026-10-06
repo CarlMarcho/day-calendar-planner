@@ -43,6 +43,9 @@ const elements = {
   calendarGrid: document.querySelector("#calendarGrid"),
   previousMonth: document.querySelector("#previousMonth"),
   nextMonth: document.querySelector("#nextMonth"),
+  previousMonthBottom: document.querySelector("#previousMonthBottom"),
+  nextMonthBottom: document.querySelector("#nextMonthBottom"),
+  bottomMonthLabel: document.querySelector("#bottomMonthLabel"),
   todayButton: document.querySelector("#todayButton"),
   jumpDate: document.querySelector("#jumpDate"),
   selectedDateLabel: document.querySelector("#selectedDateLabel"),
@@ -105,6 +108,8 @@ function initialize() {
 function bindEvents() {
   elements.previousMonth.addEventListener("click", () => shiftMonth(-1));
   elements.nextMonth.addEventListener("click", () => shiftMonth(1));
+  elements.previousMonthBottom.addEventListener("click", () => shiftMonth(-1));
+  elements.nextMonthBottom.addEventListener("click", () => shiftMonth(1));
   elements.todayButton.addEventListener("click", goToToday);
   elements.jumpDate.addEventListener("change", () => {
     const dateKey = elements.jumpDate.value;
@@ -191,7 +196,9 @@ function persist() {
 }
 
 function render() {
-  elements.calendarTitle.textContent = formatMonth(viewMonth);
+  const monthLabel = formatMonth(viewMonth);
+  elements.calendarTitle.textContent = monthLabel;
+  elements.bottomMonthLabel.textContent = monthLabel;
   elements.jumpDate.value = selectedDate;
   renderSelectedSummary();
   renderCalendar();
@@ -237,6 +244,8 @@ function renderCalendar() {
 
     cell.className = "day-cell";
     cell.dataset.date = dateKey;
+    cell.setAttribute("role", "group");
+    cell.setAttribute("aria-label", `${formatLongDate(dateKey)}. Click anywhere in this box to select this date.`);
     cell.classList.toggle("outside-month", outsideMonth);
     cell.classList.toggle("weekend", weekday === 0 || weekday === 6);
     cell.classList.toggle("today", dateKey === today);
@@ -253,8 +262,6 @@ function renderCalendar() {
         <button class="date-button" type="button" data-select-date="${dateKey}" aria-label="Select ${escapeHtml(formatLongDate(dateKey))}">
           <span class="day-number">${day}</span>
           ${outsideMonth ? `<span class="day-month">${escapeHtml(monthAbbrev)}</span>` : ""}
-          <span class="today-chip">Today</span>
-          <span class="planned-chip">Plan</span>
         </button>
         <button class="details-button" type="button" data-open-date="${dateKey}" aria-label="Open details for ${escapeHtml(formatLongDate(dateKey))}">•••</button>
       </div>
@@ -309,6 +316,7 @@ function beginPlannerTextEdit(event) {
   const input = event.target.closest('input[data-planner-text][data-date]');
   if (!input || !isValidDateKey(input.dataset.date)) return;
   const dateKey = input.dataset.date;
+  selectVisibleDate(dateKey);
   plannerTextEditSnapshot = {
     dateKey,
     value: normalizeRecord(state.days[dateKey]).plannerText,
@@ -390,18 +398,25 @@ function handleCalendarChange(event) {
 }
 
 function handleCalendarClick(event) {
-  const selectButton = event.target.closest("[data-select-date]");
-  if (selectButton) {
-    const dateKey = selectButton.dataset.selectDate;
-    selectedDate = dateKey;
-    selectedFollowsToday = dateKey === today;
-    if (dateKey.slice(0, 7) !== viewMonth.slice(0, 7)) viewMonth = firstOfMonth(dateKey);
-    render();
-    return;
-  }
+  const cell = event.target.closest(".day-cell[data-date]");
+  if (!cell) return;
+
+  const dateKey = cell.dataset.date;
+  selectVisibleDate(dateKey);
 
   const detailsButton = event.target.closest("[data-open-date]");
-  if (detailsButton) openDayDialog(detailsButton.dataset.openDate);
+  if (detailsButton) openDayDialog(dateKey);
+}
+
+function selectVisibleDate(dateKey) {
+  if (!isValidDateKey(dateKey)) return;
+  selectedDate = dateKey;
+  selectedFollowsToday = dateKey === today;
+  elements.jumpDate.value = dateKey;
+
+  elements.calendarGrid.querySelector(".day-cell.selected")?.classList.remove("selected");
+  elements.calendarGrid.querySelector(`.day-cell[data-date="${dateKey}"]`)?.classList.add("selected");
+  renderSelectedSummary();
 }
 
 function shiftMonth(amount) {

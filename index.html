@@ -8,43 +8,37 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon-192.png" />
     <link rel="apple-touch-icon" href="./icons/icon-180.png" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=1.2.0" />
     <title>Day Calendar Planner</title>
   </head>
   <body>
-    <header class="app-header">
-      <a class="brand" href="./" aria-label="Day Calendar Planner home">
-        <span class="brand-mark" aria-hidden="true">D</span>
-        <span>
-          <span class="brand-kicker">Residency planning</span>
-          <strong>Day Calendar</strong>
-        </span>
-      </a>
-      <div class="header-actions">
-        <button class="header-button hidden" id="installButton" type="button">Install app</button>
-        <button class="header-button" id="rangeButton" type="button">Fill a range</button>
-        <button class="header-button icon-label" id="settingsButton" type="button" aria-label="Settings and data">
-          <span aria-hidden="true">⚙</span><span>Settings</span>
-        </button>
-      </div>
-    </header>
-
     <main>
       <section class="control-panel" aria-labelledby="calendarTitle">
         <div class="month-controls">
-          <div class="nav-row">
-            <button class="nav-button" id="previousMonth" type="button" aria-label="Previous month">←</button>
-            <button class="today-button" id="todayButton" type="button">Today</button>
-            <button class="nav-button" id="nextMonth" type="button" aria-label="Next month">→</button>
-          </div>
-          <div>
+          <div class="month-heading">
             <p class="section-kicker">Calendar view</p>
             <h1 id="calendarTitle">Month Year</h1>
           </div>
+
           <label class="jump-control">
             <span>Jump to date</span>
             <input id="jumpDate" type="date" />
           </label>
+
+          <div class="nav-row" aria-label="Month navigation">
+            <button class="nav-button" id="previousMonth" type="button" aria-label="Previous month">←</button>
+            <button class="today-button" id="todayButton" type="button">Today</button>
+            <button class="nav-button" id="nextMonth" type="button" aria-label="Next month">→</button>
+          </div>
+
+          <div class="calendar-actions">
+            <button class="control-action primary-action" id="rangeButton" type="button">Fill a range</button>
+            <button class="control-action icon-label" id="settingsButton" type="button" aria-label="Settings and data">
+              <span aria-hidden="true">⚙</span><span>Settings</span>
+            </button>
+            <button class="control-action" id="undoButton" type="button" disabled>Undo</button>
+            <button class="control-action hidden" id="installButton" type="button">Install app</button>
+          </div>
         </div>
 
         <div class="selected-summary" aria-live="polite">
@@ -76,19 +70,6 @@
         </div>
       </section>
 
-      <section class="legend-panel" aria-label="Calendar key">
-        <div class="legend-copy">
-          <strong>Each date can have any combination of the three designations.</strong>
-          <span>Switch them independently; future dates are treated as planned days in all projected totals.</span>
-        </div>
-        <div class="legend-items">
-          <span class="legend-item category-night"><span class="legend-dot"></span>UK night</span>
-          <span class="legend-item category-work"><span class="legend-dot"></span>UK workday</span>
-          <span class="legend-item category-schengen"><span class="legend-dot"></span>Schengen day</span>
-        </div>
-        <button class="undo-button" id="undoButton" type="button" disabled>Undo</button>
-      </section>
-
       <section class="calendar-shell" aria-label="Monthly calendar">
         <div class="weekday-row" aria-hidden="true">
           <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
@@ -96,13 +77,20 @@
         <div class="calendar-grid" id="calendarGrid"></div>
       </section>
 
-      <section class="explanation-panel">
-        <div>
-          <h2>How each box is calculated</h2>
-          <p>Type a short place or plan directly in any day box. <strong>N</strong> and <strong>W</strong> count from the most recent 6 April through that date. <strong>S</strong> counts marked Schengen days in the inclusive 180-day period ending on that date.</p>
+      <nav class="bottom-month-navigation" aria-label="Calendar month navigation">
+        <button class="bottom-nav-button" id="previousMonthBottom" type="button" aria-label="Previous month">
+          <span class="bottom-nav-arrow" aria-hidden="true">←</span>
+          <span>Previous month</span>
+        </button>
+        <div class="bottom-nav-centre">
+          <span id="bottomMonthLabel">Month Year</span>
+          <button class="print-button" id="printButton" type="button">Print this month</button>
         </div>
-        <button class="secondary-button" id="printButton" type="button">Print this month</button>
-      </section>
+        <button class="bottom-nav-button" id="nextMonthBottom" type="button" aria-label="Next month">
+          <span>Next month</span>
+          <span class="bottom-nav-arrow" aria-hidden="true">→</span>
+        </button>
+      </nav>
     </main>
 
     <dialog id="rangeDialog">
@@ -226,6 +214,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script type="module" src="./app.js"></script>
+    <script type="module" src="./app.js?v=1.2.0"></script>
   </body>
 </html>

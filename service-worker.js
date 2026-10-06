@@ -1,9 +1,9 @@
-const CACHE_NAME = "day-calendar-planner-v1.1.0";
+const CACHE_NAME = "day-calendar-planner-v1.2.0";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
+  "./styles.css?v=1.2.0",
+  "./app.js?v=1.2.0",
   "./logic.js",
   "./manifest.webmanifest",
   "./icons/icon-180.png",
