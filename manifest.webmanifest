@@ -1,0 +1,16 @@
+{
+  "name": "Day Calendar Planner",
+  "short_name": "Day Calendar",
+  "description": "Visual planning calendar for UK nights, UK workdays and Schengen days.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f2ed",
+  "theme_color": "#102235",
+  "orientation": "landscape-primary",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#102235" />
+    <meta name="description" content="A visual calendar for UK nights, UK workdays and Schengen days." />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="./icons/icon-180.png" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Day Calendar Planner</title>
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="./" aria-label="Day Calendar Planner home">
+        <span class="brand-mark" aria-hidden="true">D</span>
+        <span>
+          <span class="brand-kicker">Residency planning</span>
+          <strong>Day Calendar</strong>
+        </span>
+      </a>
+      <div class="header-actions">
+        <button class="header-button hidden" id="installButton" type="button">Install app</button>
+        <button class="header-button" id="rangeButton" type="button">Fill a range</button>
+        <button class="header-button icon-label" id="settingsButton" type="button" aria-label="Settings and data">
+          <span aria-hidden="true">⚙</span><span>Settings</span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="control-panel" aria-labelledby="calendarTitle">
+        <div class="month-controls">
+          <div class="nav-row">
+            <button class="nav-button" id="previousMonth" type="button" aria-label="Previous month">←</button>
+            <button class="today-button" id="todayButton" type="button">Today</button>
+            <button class="nav-button" id="nextMonth" type="button" aria-label="Next month">→</button>
+          </div>
+          <div>
+            <p class="section-kicker">Calendar view</p>
+            <h1 id="calendarTitle">Month Year</h1>
+          </div>
+          <label class="jump-control">
+            <span>Jump to date</span>
+            <input id="jumpDate" type="date" />
+          </label>
+        </div>
+
+        <div class="selected-summary" aria-live="polite">
+          <div class="summary-heading">
+            <div>
+              <p class="section-kicker">Running totals through</p>
+              <h2 id="selectedDateLabel">Selected date</h2>
+            </div>
+            <span class="projection-badge" id="projectionBadge">Recorded</span>
+          </div>
+          <div class="summary-metrics">
+            <article class="summary-metric category-night">
+              <span class="metric-label"><span class="legend-dot"></span>UK nights</span>
+              <strong><span id="selectedNightCount">0</span><small> / <span id="selectedNightLimit">90</span></small></strong>
+            </article>
+            <article class="summary-metric category-work">
+              <span class="metric-label"><span class="legend-dot"></span>UK workdays</span>
+              <strong><span id="selectedWorkCount">0</span><small> / <span id="selectedWorkLimit">30</span></small></strong>
+            </article>
+            <article class="summary-metric category-schengen">
+              <span class="metric-label"><span class="legend-dot"></span>Schengen</span>
+              <strong><span id="selectedSchengenCount">0</span><small> / <span id="selectedSchengenLimit">90</span></small></strong>
+            </article>
+          </div>
+          <div class="summary-periods">
+            <span id="selectedTaxYear">UK year</span>
+            <span id="selectedRollingWindow">180-day window</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="legend-panel" aria-label="Calendar key">
+        <div class="legend-copy">
+          <strong>Each date can have any combination of the three designations.</strong>
+          <span>Switch them independently; future dates are treated as planned days in all projected totals.</span>
+        </div>
+        <div class="legend-items">
+          <span class="legend-item category-night"><span class="legend-dot"></span>UK night</span>
+          <span class="legend-item category-work"><span class="legend-dot"></span>UK workday</span>
+          <span class="legend-item category-schengen"><span class="legend-dot"></span>Schengen day</span>
+        </div>
+        <button class="undo-button" id="undoButton" type="button" disabled>Undo</button>
+      </section>
+
+      <section class="calendar-shell" aria-label="Monthly calendar">
+        <div class="weekday-row" aria-hidden="true">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </section>
+
+      <section class="explanation-panel">
+        <div>
+          <h2>How each box is calculated</h2>
+          <p>Type a short place or plan directly in any day box. <strong>N</strong> and <strong>W</strong> count from the most recent 6 April through that date. <strong>S</strong> counts marked Schengen days in the inclusive 180-day period ending on that date.</p>
+        </div>
+        <button class="secondary-button" id="printButton" type="button">Print this month</button>
+      </section>
+    </main>
+
+    <dialog id="rangeDialog">
+      <form class="dialog-card" id="rangeForm" method="dialog">
+        <div class="dialog-heading">
+          <div>
+            <p class="section-kicker">Bulk edit</p>
+            <h2>Fill or clear a date range</h2>
+          </div>
+          <button class="close-button" type="button" data-close-dialog="rangeDialog" aria-label="Close">×</button>
+        </div>
+        <div class="two-column-form">
+          <label>Start date<input id="rangeStart" type="date" required /></label>
+          <label>End date<input id="rangeEnd" type="date" required /></label>
+        </div>
+        <fieldset class="category-fieldset">
+          <legend>Categories to change</legend>
+          <label class="choice-card category-night"><input type="checkbox" name="rangeFlag" value="ukNight" /><span class="check-box"></span><span>UK night</span></label>
+          <label class="choice-card category-work"><input type="checkbox" name="rangeFlag" value="ukWork" /><span class="check-box"></span><span>UK workday</span></label>
+          <label class="choice-card category-schengen"><input type="checkbox" name="rangeFlag" value="schengen" /><span class="check-box"></span><span>Schengen day</span></label>
+        </fieldset>
+        <fieldset class="action-fieldset">
+          <legend>Set selected categories to</legend>
+          <label><input type="radio" name="rangeValue" value="yes" checked /><span>Yes / on</span></label>
+          <label><input type="radio" name="rangeValue" value="no" /><span>No / off</span></label>
+        </fieldset>
+        <p class="form-message" id="rangeMessage"></p>
+        <div class="dialog-actions">
+          <button class="secondary-button" type="button" data-close-dialog="rangeDialog">Cancel</button>
+          <button class="primary-button" type="submit">Apply to range</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dayDialog">
+      <form class="dialog-card" id="dayForm" method="dialog">
+        <div class="dialog-heading">
+          <div>
+            <p class="section-kicker">Day details</p>
+            <h2 id="dayDialogTitle">Date</h2>
+          </div>
+          <button class="close-button" type="button" data-close-dialog="dayDialog" aria-label="Close">×</button>
+        </div>
+        <div class="day-dialog-toggles">
+          <label class="large-toggle category-night"><span><span class="legend-dot"></span>UK night</span><input id="dayNight" type="checkbox" /><span class="switch"></span></label>
+          <label class="large-toggle category-work"><span><span class="legend-dot"></span>UK workday</span><input id="dayWork" type="checkbox" /><span class="switch"></span></label>
+          <label class="large-toggle category-schengen"><span><span class="legend-dot"></span>Schengen day</span><input id="daySchengen" type="checkbox" /><span class="switch"></span></label>
+        </div>
+        <label class="note-field">Calendar label (12 characters max)<input id="dayPlannerText" type="text" maxlength="12" placeholder="Dubai" autocomplete="off" /></label>
+        <label class="note-field">Optional longer note<textarea id="dayNote" rows="4" maxlength="500" placeholder="Travel, location or supporting detail"></textarea></label>
+        <div class="day-dialog-counts" id="dayDialogCounts"></div>
+        <div class="dialog-actions">
+          <button class="secondary-button" type="button" data-close-dialog="dayDialog">Cancel</button>
+          <button class="primary-button" type="submit">Save day</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="settingsDialog">
+      <form class="dialog-card settings-card" id="settingsForm" method="dialog">
+        <div class="dialog-heading">
+          <div>
+            <p class="section-kicker">Preferences and data</p>
+            <h2>Settings</h2>
+          </div>
+          <button class="close-button" type="button" data-close-dialog="settingsDialog" aria-label="Close">×</button>
+        </div>
+
+        <section class="settings-section">
+          <h3>Planning limits</h3>
+          <p class="muted-copy">These limits control warnings and the “x / limit” display. They do not prevent entries.</p>
+          <div class="three-column-form">
+            <label>UK nights<input id="nightLimit" type="number" min="1" max="366" inputmode="numeric" /></label>
+            <label>UK workdays<input id="workLimit" type="number" min="1" max="366" inputmode="numeric" /></label>
+            <label>Schengen days<input id="schengenLimit" type="number" min="1" max="180" inputmode="numeric" /></label>
+          </div>
+        </section>
+
+        <section class="settings-section">
+          <h3>Backup and transfer</h3>
+          <p class="muted-copy">The calendar is stored locally in this browser. Export a backup periodically. You can import the JSON backup from your existing iPhone Day Tracker.</p>
+          <div class="data-actions">
+            <button class="secondary-button" id="exportBackup" type="button">Export full backup</button>
+            <button class="secondary-button" id="exportCsv" type="button">Export CSV</button>
+            <button class="secondary-button" id="exportIphone" type="button">Export for iPhone app</button>
+            <label class="secondary-button file-button">Import backup<input id="importBackup" type="file" accept="application/json,.json" /></label>
+          </div>
+          <p class="fine-print">The iPhone-compatible export includes UK nights and Schengen days only. UK workdays, calendar labels and longer notes remain in this laptop calendar.</p>
+        </section>
+
+        <section class="settings-section danger-section">
+          <h3>Reset</h3>
+          <button class="danger-button" id="resetData" type="button">Delete all calendar data</button>
+        </section>
+
+        <div class="dialog-actions">
+          <button class="secondary-button" type="button" data-close-dialog="settingsDialog">Cancel</button>
+          <button class="primary-button" type="submit">Save settings</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="importDialog">
+      <div class="dialog-card">
+        <div class="dialog-heading">
+          <div>
+            <p class="section-kicker">Import preview</p>
+            <h2 id="importTitle">Backup found</h2>
+          </div>
+          <button class="close-button" type="button" data-close-dialog="importDialog" aria-label="Close">×</button>
+        </div>
+        <p class="import-copy" id="importCopy"></p>
+        <div class="import-stats" id="importStats"></div>
+        <div class="dialog-actions import-actions">
+          <button class="secondary-button" type="button" data-close-dialog="importDialog">Cancel</button>
+          <button class="secondary-button" id="replaceImport" type="button">Replace calendar</button>
+          <button class="primary-button" id="mergeImport" type="button">Merge safely</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
